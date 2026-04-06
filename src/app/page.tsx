@@ -1,65 +1,159 @@
-import Image from "next/image";
+"use client";
+
+import { useState } from "react";
+import { analyzePrompt, DetectionResult } from "@/lib/detector";
 
 export default function Home() {
+  const [input, setInput] = useState("");
+  const [result, setResult] = useState<DetectionResult | null>(null);
+
+  const handleAnalyze = () => {
+    const res = analyzePrompt(input);
+    setResult(res);
+  };
+
+  function getColor(risk: string) {
+  if (risk === "Safe") return "green";
+  if (risk === "Suspicious") return "orange";
+  return "red";
+}
+
+function getTypeColor(type: string) {
+  if (type === "Goal Hijacking") return "red";
+  if (type === "Prompt Leaking") return "blue";
+  if (type === "Role Manipulation") return "orange";
+  return "black";
+}
+
+function highlightText(text: string, matches: { phrase: string }[]) {
+  let result = text;
+
+  matches.forEach((m) => {
+    const regex = new RegExp(`(${m.phrase})`, "gi");
+    result = result.replace(
+      regex,
+      `<span style="background-color: yellow; font-weight: bold;">$1</span>`
+    );
+  });
+
+  return result;
+}
+
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
+  <main style={{ padding: "2rem", fontFamily: "Arial", maxWidth: "800px", margin: "auto" }}>
+    <h1 style={{ fontSize: "2rem", fontWeight: "bold" }}>
+      Prompt Injection Detector
+    </h1>
+
+    <textarea
+      rows={6}
+      style={{
+        width: "100%",
+        marginTop: "1rem",
+        padding: "0.5rem",
+        borderRadius: "8px",
+        border: "1px solid #ccc"
+      }}
+      placeholder="Enter a prompt..."
+      value={input}
+      onChange={(e) => setInput(e.target.value)}
+    />
+
+    <button
+      onClick={handleAnalyze}
+      style={{
+        marginTop: "1rem",
+        padding: "0.5rem 1rem",
+        borderRadius: "8px",
+        backgroundColor: "#0070f3",
+        color: "white",
+        border: "none",
+        cursor: "pointer"
+      }}
+    >
+      Analyze
+    </button>
+
+    {result && (
+      <div
+        style={{
+          marginTop: "2rem",
+          padding: "1rem",
+          borderRadius: "10px",
+          border: "1px solid #ddd",
+          backgroundColor: "#f9f9f9",
+          color: "#111",
+          boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+        }}
+      >
+
+        <h3>- Analyzed Input</h3>
+        <p
+          dangerouslySetInnerHTML={{
+            __html: highlightText(input, result.matches),
+          }}
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
-          </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
+
+        <h2 style={{ color: "#000" }}>Analysis Result</h2>
+
+        <p>
+          <strong>Risk Level:</strong>{" "}
+          <span style={{ color: getColor(result.riskLevel), fontWeight: "bold" }}>
+            {result.riskLevel}
+          </span>
+        </p>
+
+        <p><strong>Score:</strong> {result.score}</p>
+
+        <p>
+          <strong>Attack Type:</strong>{" "}
+          {result.attackTypes && result.attackTypes.length > 0
+            ? result.attackTypes.join(", ")
+            : "None"}
+        </p>
+
+        <p style={{ color: "#333" }}>
+        <strong>Explanation:</strong> {result.explanation}
+        </p>
+
+        <h3>- Analysis Steps</h3>
+        <ul style={{ color: "#222", lineHeight: "1.6" }}>
+          {result.steps.map((step, i) => (
+            <li key={i}>{step}</li>
+          ))}
+        </ul>
+
+        <hr style={{ margin: "1rem 0" }} />
+
+        <h3>- Detected Attacks</h3>
+
+        {result.matches.length === 0 ? (
+          <p>No suspicious patterns detected.</p>
+        ) : (
+          Object.entries(
+            result.matches.reduce((acc, match) => {
+              if (!acc[match.type]) acc[match.type] = [];
+              acc[match.type].push(match);
+              return acc;
+            }, {} as Record<string, typeof result.matches>)
+            ).map(([type, matches]) => (
+            <div key={type} style={{ marginBottom: "1rem" }}>
+              <h4 style={{ color: getTypeColor(type) }}>{type}</h4>
+
+              <ul>
+                {matches.map((m, i) => (
+                  <li key={i}>
+                    <strong>{m.phrase}</strong>
+                    <br />
+                    <span style={{ color: "#555" }}>{m.reason}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ))
+        )}
+      </div>
+    )}
+  </main>
+);
 }
