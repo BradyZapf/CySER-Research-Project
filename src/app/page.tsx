@@ -19,17 +19,28 @@ export default function Home() {
 }
 
 function getTypeColor(type: string) {
-  if (type === "Goal Hijacking") return "red";
-  if (type === "Prompt Leaking") return "blue";
-  if (type === "Role Manipulation") return "orange";
+  if (type === "Goal Hijacking") return "#c0392b";
+  if (type === "Prompt Leaking") return "#2980b9";
+  if (type === "Role Manipulation") return "#e67e22";
+  if (type === "Delimiter Injection") return "#8e44ad";
+  if (type === "Fictional Framing") return "#16a085";
+  if (type === "Privilege Escalation") return "#922b21";
+  if (type === "Obfuscation") return "#616a6b";
+  if (type === "Harmful Content") return "#7b241c";
+  if (type === "Social Engineering") return "#784212";
   return "black";
 }
 
-function highlightText(text: string, matches: { phrase: string }[]) {
+function escapeRegex(str: string) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+function highlightText(text: string, matches: { matchedText: string }[]) {
   let result = text;
 
   matches.forEach((m) => {
-    const regex = new RegExp(`(${m.phrase})`, "gi");
+    if (!m.matchedText || m.matchedText.startsWith("[")) return;
+    const regex = new RegExp(`(${escapeRegex(m.matchedText)})`, "gi");
     result = result.replace(
       regex,
       `<span style="background-color: yellow; font-weight: bold;">$1</span>`
