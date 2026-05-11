@@ -94,7 +94,7 @@ function highlightText(text: string, matches: { phrase: string }[]) {
           }}
         />
 
-        <h2 style={{ color: "#000" }}>Analysis Result</h2>
+        <h2 style={{ color: "#000" }}>- Analysis Result</h2>
 
         <p>
           <strong>Risk Level:</strong>{" "}
