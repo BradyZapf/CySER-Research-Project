@@ -26,6 +26,10 @@ function getTypeColor(type: string) {
   if (type === "Fictional Framing") return "#16a085";
   if (type === "Privilege Escalation") return "#922b21";
   if (type === "Obfuscation") return "#616a6b";
+  if (type === "Indirect Injection") return "#2c3e50";
+  if (type === "Tool Abuse") return "#d35400";
+  if (type === "RAG Poisoning") return "#117a65";
+  if (type === "Data Exfiltration") return "#6c3483";
   if (type === "Harmful Content") return "#7b241c";
   if (type === "Social Engineering") return "#784212";
   return "black";
@@ -38,9 +42,13 @@ function escapeRegex(str: string) {
 function highlightText(text: string, matches: { matchedText: string }[]) {
   let result = text;
 
-  matches.forEach((m) => {
-    if (!m.matchedText || m.matchedText.startsWith("[")) return;
-    const regex = new RegExp(`(${escapeRegex(m.matchedText)})`, "gi");
+  matches.forEach((match) => {
+    if (!match.matchedText || match.matchedText.startsWith("[")) {
+      return;
+    }
+
+    const regex = new RegExp(`(${escapeRegex(match.matchedText)})`, "gi");
+
     result = result.replace(
       regex,
       `<span style="background-color: yellow; font-weight: bold;">$1</span>`
@@ -105,7 +113,7 @@ function highlightText(text: string, matches: { matchedText: string }[]) {
           }}
         />
 
-        <h2 style={{ color: "#000" }}>Analysis Result</h2>
+        <h2 style={{ color: "#000" }}>- Analysis Result</h2>
 
         <p>
           <strong>Risk Level:</strong>{" "}
