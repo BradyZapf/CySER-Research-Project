@@ -35,14 +35,14 @@ function normalizeLeet(text: string): string {
 function detectObfuscation(input: string): Match[] {
   const found: Match[] = [];
 
-  const zeroWidthMatch = /[\u200B-\u200D\uFEFF\u00AD]/.exec(input);
-
+  // Zero-width / invisible characters
+  const zeroWidthMatch = /[​‌‍﻿­]/.exec(input);
   if (zeroWidthMatch) {
     found.push({
       phrase: "Zero-width characters",
       matchedText: "[invisible characters]",
       risk: 3,
-      reason: "Invisible Unicode characters may be used to evade keyword detection",
+      reason: "Zero-width Unicode characters detected — commonly inserted into attack keywords to evade string matching",
       type: "Obfuscation",
     });
   }
@@ -63,6 +63,10 @@ function detectObfuscation(input: string): Match[] {
     {
       pattern: /p[\s._\-*]+r[\s._\-*]+o[\s._\-*]+m[\s._\-*]+p[\s._\-*]+t/i,
       word: "prompt",
+    },
+    {
+      pattern: /a[\s._\-*]+d[\s._\-*]+m[\s._\-*]+i[\s._\-*]+n/i,
+     word: "admin",
     },
   ];
 
