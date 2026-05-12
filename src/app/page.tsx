@@ -42,9 +42,13 @@ function escapeRegex(str: string) {
 function highlightText(text: string, matches: { matchedText: string }[]) {
   let result = text;
 
-  matches.forEach((m) => {
-    if (!m.matchedText || m.matchedText.startsWith("[")) return;
-    const regex = new RegExp(`(${escapeRegex(m.matchedText)})`, "gi");
+  matches.forEach((match) => {
+    if (!match.matchedText || match.matchedText.startsWith("[")) {
+      return;
+    }
+
+    const regex = new RegExp(`(${escapeRegex(match.matchedText)})`, "gi");
+
     result = result.replace(
       regex,
       `<span style="background-color: yellow; font-weight: bold;">$1</span>`
